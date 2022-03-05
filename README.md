@@ -13,7 +13,9 @@ Project Motivations:
  The startup needs to identify patients that the need to take part in the study. A model needs to be built to estimate the hospitalization time for a patient, as well as filter patients for the study. The model needs to also be unbiased.
 
  2. Installations:
- The following libraries will be used in the project:
+
+ The following libraries will be used in the project.
+
  1. Numpy
  2. Pandas
  3. Aequitas
