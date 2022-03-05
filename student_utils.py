@@ -3,7 +3,6 @@ import numpy as np
 import os
 import tensorflow as tf
 
-####### STUDENTS FILL THIS OUT ######
 #Question 3
 def reduce_dimension_ndc(df, ndc_df):
     '''
