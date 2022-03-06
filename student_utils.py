@@ -13,7 +13,7 @@ def reduce_dimension_ndc(df, ndc_df):
     '''
     new_ndc_df = ndc_df.copy()
     new_ndc_df.drop(['Non-proprietary Name', 'Dosage Form', 'Route Name', 'Company Name', 'Product Type'], axis=1, inplace=True)
-    df = pd.merge(df, new_ndc_df, how='inner', left_on='ndc_code', right_on='NDC_Code', copy=True)
+    df = pd.merge(df, new_ndc_df, how='inner', left_on='ndc_code', right_on='NDC_Code', copy=True) # Combine the new_ndc_df and df dataframes
     df.rename(columns = {'Proprietary Name' : 'generic_drug_name'}, inplace = True)
     return df
 
@@ -26,18 +26,19 @@ def select_first_encounter(df):
     '''
     
     first_encounter_df = pd.read_csv("first_encounter_df.csv") # Dataframe created and saved to speed up notebook
+    """
+    df_columns = df.columns
+    df = df.sort_values('encounter_id', ascending=True)
+    unique_ids = df['patient_nbr'].unique()
     
-    #df_columns = df.columns
-    #df = df.sort_values('encounter_id', ascending=True)
-    #unique_ids = df['patient_nbr'].unique()
+    first_encounter_df = pd.DataFrame(columns=df.columns)
+    new_df = pd.DataFrame(columns=df.columns)
     
-    #first_encounter_df = pd.DataFrame(columns=df.columns)
-    #new_df = pd.DataFrame(columns=df.columns)
-    
-    #for i in unique_ids:
-    #    df1 = pd.DataFrame(df[df['patient_nbr'] == i].iloc[0]).T
-    #    first_encounter_df = pd.concat([first_encounter_df, df1], copy=True, axis = 0)
+    for i in unique_ids:
+        df1 = pd.DataFrame(df[df['patient_nbr'] == i].iloc[0]).T
+        first_encounter_df = pd.concat([first_encounter_df, df1], copy=True, axis = 0)
         
+    """
     
     return first_encounter_df
 
@@ -56,16 +57,15 @@ def patient_dataset_splitter(df, patient_key='patient_nbr'):
     test_percentage = 0.2
     valid_percentage = 0.1
     
-    df = df.iloc[np.random.permutation(len(df))]
-    unique_values = df[patient_key].unique()
+    df = df.iloc[np.random.permutation(len(df))] # Randomize data within dataframe 
+    unique_values = df[patient_key].unique() # Return unique patient keys
     total_values = len(unique_values)
     sample_size = round(total_values * (1 - test_percentage - valid_percentage))
     test_size = round(total_values * (test_percentage))
-    train = df[df[patient_key].isin(unique_values[:sample_size])].reset_index(drop=True)
-    test = df[df[patient_key].isin(unique_values[sample_size:sample_size+test_size])].reset_index(drop=True)
-    validation = df[df[patient_key].isin(unique_values[sample_size+test_size:])].reset_index(drop=True)
-    
-    print(total_values)
+    train = df[df[patient_key].isin(unique_values[:sample_size])].reset_index(drop=True) # Returns training dataset
+    test = df[df[patient_key].isin(unique_values[sample_size:sample_size+test_size])].reset_index(drop=True) # Returns the testing dataset
+    validation = df[df[patient_key].isin(unique_values[sample_size+test_size:])].reset_index(drop=True) # Returns the validation dataset
+
     
     print("Total number of unique patients in train = ", len(train[patient_key].unique()))
     print("Total number of unique patients in test = ", len(test[patient_key].unique()))
@@ -74,7 +74,7 @@ def patient_dataset_splitter(df, patient_key='patient_nbr'):
     print("Test partition has a shape = ", test.shape)
     print("Test partition has a shape = ", validation.shape)
     
-    return train, validation, test
+    return train, validation, test # Dataframes that have been successfully split into training, testing and validation datasets
 
 #Question 7
 
@@ -89,14 +89,9 @@ def create_tf_categorical_feature_cols(categorical_col_list,
     output_tf_list = []
     for c in categorical_col_list:
         vocab_file_path = os.path.join(vocab_dir,  c + "_vocab.txt")
-        '''
-        Which TF function allows you to read from a text file and create a categorical feature
-        You can use a pattern like this below...
-        tf_categorical_feature_column = tf.feature_column.......
-
-        '''
+       
         tf_categorical_feature_column = tf.feature_column.categorical_column_with_vocabulary_file(c, vocab_file_path)        
-        tf_categorical_feature_column = tf.feature_column.indicator_column(tf_categorical_feature_column)  
+        tf_categorical_feature_column = tf.feature_column.indicator_column(tf_categorical_feature_column)  # Returns TF Categorical Feature column
         output_tf_list.append(tf_categorical_feature_column)
     return output_tf_list
 
@@ -118,7 +113,7 @@ def create_tf_numeric_feature(col, MEAN, STD, default_value=0):
         tf_numeric_feature: tf feature column representation of the input field
     '''
     
-    tf_numeric_feature = tf.feature_column.numeric_column(key=col, default_value=0, dtype=tf.float64, normalizer_fn=(lambda x: (x-MEAN)/STD))
+    tf_numeric_feature = tf.feature_column.numeric_column(key=col, default_value=0, dtype=tf.float64, normalizer_fn=(lambda x: (x-MEAN)/STD)) ## Returns TF Numeric Feature column
     
     return tf_numeric_feature
 
@@ -127,8 +122,8 @@ def get_mean_std_from_preds(diabetes_yhat):
     '''
     diabetes_yhat: TF Probability prediction object
     '''
-    m = diabetes_yhat.mean()
-    s = diabetes_yhat.stddev()
+    m = diabetes_yhat.mean() # Mean of diabetes_yhat values
+    s = diabetes_yhat.stddev() # Standard deviation of diabetes_yhat values
     return m, s
 
 # Question 10
