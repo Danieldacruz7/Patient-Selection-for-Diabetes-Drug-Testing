@@ -13,7 +13,7 @@ def reduce_dimension_ndc(df, ndc_df):
     '''
     new_ndc_df = ndc_df.copy()
     new_ndc_df.drop(['Non-proprietary Name', 'Dosage Form', 'Route Name', 'Company Name', 'Product Type'], axis=1, inplace=True)
-    df = pd.merge(df, new_ndc_df, how='inner', left_on='ndc_code', right_on='NDC_Code', copy=True) # Combine the new_ndc_df and df dataframes
+    df = pd.merge(df, new_ndc_df, how='outer', left_on='ndc_code', right_on='NDC_Code', copy=True) # Combine the new_ndc_df and df dataframes
     df.rename(columns = {'Proprietary Name' : 'generic_drug_name'}, inplace = True)
     return df
 
@@ -24,21 +24,8 @@ def select_first_encounter(df):
     return:
         - first_encounter_df: pandas dataframe, dataframe with only the first encounter for a given patient
     '''
-    
-    first_encounter_df = pd.read_csv("first_encounter_df.csv") # Dataframe created and saved to speed up notebook
-    """
-    df_columns = df.columns
-    df = df.sort_values('encounter_id', ascending=True)
-    unique_ids = df['patient_nbr'].unique()
-    
-    first_encounter_df = pd.DataFrame(columns=df.columns)
-    new_df = pd.DataFrame(columns=df.columns)
-    
-    for i in unique_ids:
-        df1 = pd.DataFrame(df[df['patient_nbr'] == i].iloc[0]).T
-        first_encounter_df = pd.concat([first_encounter_df, df1], copy=True, axis = 0)
-        
-    """
+
+    first_encounter_df = df.groupby('patient_nbr', as_index=False).first()
     
     return first_encounter_df
 
