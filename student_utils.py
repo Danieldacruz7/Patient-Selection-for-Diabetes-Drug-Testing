@@ -13,7 +13,7 @@ def reduce_dimension_ndc(df, ndc_df):
     '''
     new_ndc_df = ndc_df.copy()
     new_ndc_df.drop(['Non-proprietary Name', 'Dosage Form', 'Route Name', 'Company Name', 'Product Type'], axis=1, inplace=True)
-    df = pd.merge(df, new_ndc_df, how='outer', left_on='ndc_code', right_on='NDC_Code', copy=True) # Combine the new_ndc_df and df dataframes
+    df = pd.merge(df, new_ndc_df, how='left', left_on='ndc_code', right_on='NDC_Code', copy=True) # Combine the new_ndc_df and df dataframes
     df.rename(columns = {'Proprietary Name' : 'generic_drug_name'}, inplace = True)
     return df
 
